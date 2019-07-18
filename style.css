@@ -1,0 +1,394 @@
+
+/*
+ * =================
+ *   css variables
+ * =================
+ */
+
+:root
+{
+	/* variables for sizing */
+	--medium: 20px;
+
+	 --extra: calc(var(--medium) *    2);
+	 --large: calc(var(--medium) *  1.5);
+
+	 --small: calc(var(--medium) *  0.5);
+	  --tiny: calc(var(--medium) * 0.25);
+
+	/* variables for colors */
+	--layer0: #28403E;
+	--layer1: #8D1E35;
+	--layer2: #BF4C54;
+	--layer3: #FBBB84;
+
+	--placeholder: #5a5a5a;
+	--screen: #00000077;
+
+	--invisible: #00000000;
+
+	/* default fonts */
+	font-family: Arial, Helvetica, sans-serif;
+	color: var(--layer2);
+}
+
+/* default positioning */
+div, p, input
+{
+	display: block;
+	position: relative;
+	box-sizing: border-box;
+}
+
+/* remove some default browser brap */
+html, body, p
+{
+	margin: 0px;
+	padding: 0px;
+	width: 100%;
+	height: 100%;
+	border: 0px;
+}
+
+input
+{
+	padding: 0px;
+	border: unset;
+	background-color: var(--invisible);
+	font: unset;
+	-webkit-appearance: unset;
+}
+
+input:focus
+{
+	outline: unset;
+}
+
+/*
+ * ============================
+ *   non-specific to any area
+ * ============================
+ */
+
+.title
+{
+	width: 100%;
+	text-align: center;
+ 
+	white-space: nowrap;	
+}
+
+.title::placeholder
+{
+	color: var(--placeholder);
+}
+
+.hidden
+{
+	display: none;
+}
+
+::-webkit-scrollbar
+{
+	display: none;
+}
+
+/*
+ * =====================
+ *   popup and spiral
+ * =====================
+ */
+
+.screen
+{
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	width: 100%;
+	height: 100%;
+
+	background-color: var(--screen);
+}
+
+.popup
+{
+	/* center this vertically */
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+
+	width: calc(var(--extra) * 8);
+	height: calc(var(--extra) * 8);
+
+	background-color: var(--layer0);
+
+	display: grid;
+	grid-template-columns: 1fr;
+	grid-template-rows: 1fr var(--extra);
+}
+
+.spiral_housing
+{
+	margin-left: auto;
+	margin-right: auto;
+
+	height: calc(var(--extra) * 7);
+	width: calc(var(--extra) * 7);
+}
+
+.spiral
+{
+	width: 100%;
+	height: 100%;
+}
+
+.spiral > polyline
+{
+	stroke: var(--layer3);
+	stroke-width: 1;
+	fill: none;
+}
+
+.spiral_button
+{
+	width: 100%;
+	height: 100%;
+
+	background-color: var(--layer1);
+	color: var(--layer2);
+
+	line-height: var(--extra);
+	font-size: var(--large);
+	text-align: center;
+
+	user-select: none;
+}
+
+.spiral_button:hover
+{
+	background-color: var(--layer2);
+	color: var(--layer3);
+}
+
+.spiral_button:active
+{
+	background-color: var(--layer3);
+	color: var(--layer2);
+}
+
+/*
+ * =====================
+ *   all about buttons
+ * =====================
+ */
+
+ .button
+ {
+	 position: absolute;
+	 right: 0px;
+	 top: 0px;
+ 
+	 background-color: var(--invisible);
+	 color: var(--layer2);
+ 
+	 /* we center the +/- text in the middle so it's like an icon */
+	 text-align: center;
+	 /* make it also unselectable, like an icon */
+	 user-select: none;
+ }
+ 
+ .button:hover
+ {
+	 background-color: var(--layer2);
+	 color: var(--layer3);
+ }
+ 
+ .button:active
+ {
+	 background-color: var(--layer3);
+	 color: var(--layer2);
+ }
+
+/*
+ * ======================================
+ *   all about the container and header
+ * ======================================
+ */
+
+.container
+{
+	width: 100%;
+	height: 100%;
+
+	display: grid;
+	grid-template-columns: 1fr;
+	grid-template-rows: var(--extra) 1fr;
+	
+	background-color: var(--layer0);
+
+	min-width: calc(18 * var(--extra));
+}
+
+.header
+{
+	width: 100%;
+	height: fit-content;
+
+	background-color: var(--layer1);
+
+	display: grid;
+	grid-template-columns: 1fr calc(var(--extra) * 7);
+	grid-template-rows: 1fr;
+}
+
+.header > .title
+{
+	height: var(--extra);
+	width: 100%;
+
+	font-size: var(--large);
+	line-height: var(--extra);
+}
+
+.button_holder
+{
+	height: var(--extra);
+	width: fit-content;
+}
+
+/* top bar buttons */
+.button_holder > .button
+{
+	width: var(--extra);
+	height: var(--extra);
+	line-height: var(--extra);
+	font-size: var(--large);
+
+	position: relative;
+	float: left;
+}
+
+/* where all the sections go */
+.sections
+{
+	width: calc(18 * var(--extra));
+	margin-left: auto;
+	margin-right: auto;
+
+	height: 100%;
+	min-height: fit-content;
+
+	display: flex;
+	flex-wrap: wrap;
+	flex-direction: row;
+	align-content: flex-start;
+	justify-content: flex-start;
+	align-items: flex-start;
+}
+
+/*
+ * ======================
+ *   all about sections
+ * ======================
+ */
+
+.section
+{
+	margin-left: var(--small);
+	margin-top: var(--small);
+	height: fit-content;
+	width: calc(50% - (var(--small) * 3 / 2));
+	background-color: var(--layer1);
+}
+
+.section > .title
+{
+	width: 100%;
+	height: var(--large);
+
+	text-align: center;
+
+	font-size: var(--medium);
+	line-height: var(--large);
+
+	color: var(--layer2);
+}
+
+.section > .title:focus
+{
+	background-color: var(--layer2);
+	color: var(--layer3);
+}
+
+.section > .button
+{
+	height: var(--large);
+	width: var(--large);
+	line-height: var(--large);
+	font-size: var(--large);
+}
+
+.section > .section_remove
+{
+	right: unset;
+	left: 0px;
+}
+
+/**
+ * =====================
+ *   all about options
+ * =====================
+ */
+
+.option
+{
+	height: var(--medium);
+	width: 100%;
+
+	background-color: var(--invisible);
+}
+
+/* the text inside an option */
+.option > .title
+{
+	height: 100%;
+	font-size: var(--small);
+	line-height: var(--medium);
+
+	color: var(--layer2);
+}
+
+.option > .title:focus
+{
+	background-color: var(--layer2);
+	color: var(--layer3);
+}
+
+/* if we're being pointed to */
+.selected > .title
+{
+	background-color: var(--layer3);
+}
+
+/* if we're crossed out */
+.checked > .title
+{
+	text-decoration: line-through wavy var(--placeholder);
+	color: var(--placeholder);
+}
+
+/* if we're the chosen option */
+.chosen > .title
+{
+	background-color: var(--layer2);
+	color: var(--layer3);
+}
+
+.option > .button
+{
+	height: var(--medium);
+	width: var(--medium);
+	line-height: var(--medium);
+	font-size: var(--medium)
+}
