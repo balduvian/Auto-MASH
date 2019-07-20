@@ -823,14 +823,14 @@ namespace Spiral
 		spiral.clip_line += ` ${final_x},${final_y}`;
 		spiral.line.setAttributeNS(null, 'points', spiral.clip_line);
 
-		/// close the popup after a second
+		/// close the popup after two seconds
 		/// then start the MASH selection
 		window.setTimeout(() =>
 		{
 			hide_spiral_popup();
 			
 			Elimination.begin(score);
-		}, 1000);
+		}, 2000);
 	}
 
 	function create_spiral_line()
@@ -1168,6 +1168,13 @@ namespace Elimination
 				op.dom.classList.remove('chosen');
 			});
 		});
+
+		/// remove all cross_out's
+		let crosses = document.getElementsByClassName('cross_out');
+		while(crosses.length !== 0)
+		{
+			crosses[0].remove();
+		}
 	}	
 
 	function end()

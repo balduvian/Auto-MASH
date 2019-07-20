@@ -32,6 +32,15 @@
 * Some color theme values were not being applied
 * You could save a blank MASH
 * Short strings weren't being decorated correctly
+> `features`
+* New animated squiggles
+
+## V1.0.8
+> `bugfixes`
+* Squiggles weren't getting reset
+> `changes`
+* Spiral stays up for longer
+* Added icon and html title to this project
 
 ## Proposed Features
 * SVG icons
@@ -40,3 +49,4 @@
 * Make it safari compatible
 * custom color theme json load/save
 * Page title as part of the MASH
+* Spiral counts points to you
