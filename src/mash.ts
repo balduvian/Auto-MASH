@@ -25,6 +25,7 @@ namespace Theme
 		layer2: string;
 		layer3: string;
 		placeh: string;
+		screen: string;
 	}
 
 	const LIGHT_THEME: Color_Theme =
@@ -34,6 +35,7 @@ namespace Theme
 		layer2: '#292929',
 		layer3: '#00A0EF',
 		placeh: '#5a5a5a',
+		screen: '#00000077'
 	};
 
 	const ALT_THEME: Color_Theme =
@@ -43,6 +45,7 @@ namespace Theme
 		layer2: '#e9c46a',
 		layer3: '#f07422',
 		placeh: '#5c5954',
+		screen: '#00000077'
 	};
 
 	const DARK_THEME: Color_Theme =
@@ -52,6 +55,7 @@ namespace Theme
 		layer2: '#ffffff',
 		layer3: '#E23A3C',
 		placeh: '#c7c7c7',
+		screen: '#77777777'
 	};
 
 	const OLD_THEME: Color_Theme =
@@ -61,6 +65,7 @@ namespace Theme
 		layer2: '#BF4C54',
 		layer3: '#FBBB84',
 		placeh: '#233c40',
+		screen: '#00000077'
 	};
 
 	export const THEME_LIST: Color_Theme[] =
@@ -92,6 +97,8 @@ namespace Theme
 		style.setProperty('--layer1', theme.layer1);
 		style.setProperty('--layer2', theme.layer2);
 		style.setProperty('--layer3', theme.layer3);
+		style.setProperty('--placeholder', theme.placeh);
+		style.setProperty('--screen', theme.screen);
 
 		current_theme = ti;
 
@@ -257,6 +264,52 @@ namespace Dom
 		value?: string;
 	}
 	
+	interface View_Box
+	{
+		x: number;
+		y: number;
+		width: number;
+		height: number;
+	}
+
+	const ns = 'http://www.w3.org/2000/svg';
+
+	/**
+	 * creates an svg
+	 * 
+	 * @param box - sets the viewBox attribute of the svg
+	 */
+	export function create_svg(options: Create_Options, box?: View_Box, aspect?: string): Element
+	{
+		let svg = document.createElementNS(ns, 'svg');
+
+		svg.classList.add(options.class_name);
+
+		if(box)
+			svg.setAttributeNS(null, 'viewBox', `${box.x} ${box.y} ${box.width} ${box.height}`);
+
+		if(aspect)
+			svg.setAttributeNS(null, 'preserveAspectRatio', aspect);
+
+		if(options.parent)
+			options.parent.appendChild(svg);
+
+		return svg;
+	}
+
+	/**
+	 * adds a polyline element to an svg
+	 * @param svg - the svg to add a line to
+	 */
+	export function add_svg_line(svg: Element): Element
+	{
+		let line = document.createElementNS(ns, 'polyline');
+		line.setAttributeNS(null, 'points', '');
+		svg.appendChild(line);
+
+		return line;
+	}
+
 	/**
 	 * creates and returns an html element
 	 * used by the more specialized functions
@@ -537,17 +590,45 @@ function load_json(json: any): boolean
 	/// and re add
 	MASH.clear_sections();
 	sections.forEach(sec => MASH.create_section(sec));
-
 	return true;
+}
+
+/**
+ * see if we should really be able to save
+ * throws an exception if not
+ * 
+ * otherwise does nothing
+ * @param secs - sections to check
+ */
+function check_save_ready(secs: Section[]): void
+{
+	if(secs.length === 0)
+		throw 'There are no sections to save!';
+
+	/// only if there is not a section with options
+	if(secs.every(sec =>
+	{
+		return sec.options.length === 0;
+	}))
+		throw 'There are no options to save!';
+
+	/// if nothing is named
+	if(secs.every(sec =>
+	{
+		return (
+			(sec.value === '')
+			&& (sec.options.every(op => op.value === '')));
+	}))
+		throw 'Nothing is named to save';
 }
 
 /**
  * makes you download a created json file from the
  * sections given
  */
-function save_json(sections: Section[])
+function save_json(secs: Section[])
 {
-	let data:MASH.Section_Template[] = sections.map(sec =>
+	let data:MASH.Section_Template[] = secs.map(sec =>
 	{
 		return {
 			name: sec.value,
@@ -557,7 +638,7 @@ function save_json(sections: Section[])
 
 	console.log(data);
 
-	let file = new Blob([JSON.stringify(data)], {type: 'text'});
+	let file = new Blob([JSON.stringify({sections: data})], {type: 'text'});
 
 	console.log(file);
 
@@ -677,18 +758,7 @@ namespace Spiral
 		let spiral_housing = Dom.create_div({class_name: 'spiral_housing', parent: popup});
 		spiral_button = Dom.create_div({class_name: 'spiral_button', parent: popup, text: 'Start Spiral'});
 
-		/// create spiral svg
-		let ns = 'http://www.w3.org/2000/svg';
-		let svg = document.createElementNS(ns, 'svg');
-		svg.classList.add('spiral');
-		svg.setAttributeNS(null, 'viewBox', '0 0 100 100');
-		//svg.setAttributeNS(null, 'width', '100');
-		//svg.setAttributeNS(null, 'height', '100');
-		spiral_housing.appendChild(svg);
-		///
-		let line = document.createElementNS(ns, 'polyline');
-		line.setAttributeNS(null, 'points', '');
-		svg.appendChild(line);
+		let svg = Dom.create_svg({class_name: 'spiral', parent: spiral_housing}, {x: 0, y: 0, width: 100, height: 100});
 
 		///reset spiral
 		spiral = {
@@ -705,7 +775,7 @@ namespace Spiral
 			speed: 60,
 
 			clip_line: '',
-			line: line
+			line: Dom.add_svg_line(svg)
 		};
 
 		spiral_button.onclick = () =>
@@ -952,6 +1022,7 @@ namespace Elimination
 			/// check it
 			cur_option.checked = true;
 			cur_option.dom.classList.add('checked');
+			create_cross_out(cur_option.dom);
 
 			/// has everything else been selected?
 			let amount_checked = 0;
@@ -1010,6 +1081,57 @@ namespace Elimination
 				window.setTimeout(increment, timing_function(200, 100, mash_number, step_count));
 			}
 		}
+	}
+
+	/**
+	 * creates and updates a cross out animation until it's done
+	 * all async don't worry
+	 * @param option - the option div to place the cross out in
+	 */
+	function create_cross_out(option: HTML_Div_Element): void
+	{
+		let svg = Dom.create_svg({class_name: 'cross_out', parent: option}, {x: 0, y: 0, width: 100, height: 100}, 'none');
+		let line = Dom.add_svg_line(svg);
+		line.setAttributeNS(null, 'vector-effect', 'non-scaling-stroke');
+		let cur_x = 0;
+		let up = (Math.random() > 0.5);
+		let line_str = '';
+
+		let y_range = (): number =>
+		{
+			/// up is between 60 and 90
+			/// down is between 10 and 40
+			return Math.random() * 30 + (up ? 10 : 60);
+		};
+
+		let x_advance = (): void =>
+		{
+			/// advance x between 1 and 3
+			/// avg of 2 for avg of 50 points
+			cur_x += Math.random() * 2 + 1;
+		};
+
+		function update()
+		{
+			/// our destination is on the opposite half of the line
+			up = !up;
+			x_advance();
+
+			/// see if we're done
+			if(cur_x >= 98)
+				return;
+
+			//add new point to line
+			line_str += ` ${cur_x} ${y_range()}`;
+
+			/// update line segment
+			line.setAttributeNS(null, 'points', line_str);
+
+			/// callback
+			window.requestAnimationFrame(update);
+		}
+
+		update();
 	}
 
 	/**
@@ -1111,6 +1233,13 @@ namespace Run_Button
  * =====================================
  */
 
+function mobile_check()
+{
+	let check = false;
+	(function(a){if(/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino/i.test(a)||/1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(a.substr(0,4))) check = true;})(navigator.userAgent||navigator.vendor||(<any>window).opera);
+	return check;
+}
+
 /**
  * generates the base page dom
  * also inits MASH
@@ -1186,6 +1315,7 @@ function start(): void
 
 	json_button.onclick = async () =>
 	{
+		json_file_open.value = '';
 		json_file_open.click();
 	};
 
@@ -1220,7 +1350,15 @@ function start(): void
 
 	save_button.onclick = () =>
 	{
-		save_json(MASH.sections);
+		try
+		{
+			check_save_ready(MASH.sections);
+			save_json(MASH.sections);
+		}
+		catch(ex)
+		{
+			alert(ex);
+		}
 	};
 
 	Run_Button.set_run();

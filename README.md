@@ -24,3 +24,19 @@
 
 ## Running
 * Make sure that you have at least one section, and at least two options for each section. Also that each section and option are named.
+
+## V1.0.5
+> `bugfixes`
+* Page didn't extend down far enough
+* Loading the same JSON twice would do nothing
+* Some color theme values were not being applied
+* You could save a blank MASH
+* Short strings weren't being decorated correctly
+
+## Proposed Features
+* SVG icons
+* Mobile mode
+* Exit out of spiral
+* Make it safari compatible
+* custom color theme json load/save
+* Page title as part of the MASH
