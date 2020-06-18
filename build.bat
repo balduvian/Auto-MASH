@@ -1,0 +1,1 @@
+call tsc mash.ts --outFile mash.js --target ES2018 --module None

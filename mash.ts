@@ -912,6 +912,12 @@ namespace Spiral
  */
 namespace Elimination
 {
+	interface Link_Section
+	{
+		option?: HTML_Div_Element;
+		next?: Link_Section;
+	}
+
 	export let going: boolean = false;
 
 	let section_pointer: number;
@@ -928,6 +934,8 @@ namespace Elimination
 
 	let internal_sections: Section[];
 
+	let linked_list: Link_Section;
+
 	export let fast: boolean;
 
 	export function begin(num: number)
@@ -935,6 +943,8 @@ namespace Elimination
 		going = true;
 		fast = false;
 
+		/// create linked list
+		
 		/// re order our internal sections
 		internal_sections = [];
 		let len = MASH.sections.length;
@@ -969,6 +979,28 @@ namespace Elimination
 		reset_steps();
 
 		increment();
+	}
+
+	function create_linked_list(sections: Section[]): Link_Section
+	{
+		let last: Link_Section = {
+			option: sections[0].options[0].dom,
+			next: null,
+		};
+
+		sections.forEach(sec =>
+		{
+			sec.options.forEach(op =>
+			{
+				let future: Link_Section = {};
+				last.option = op.dom;
+				last.next = future;
+
+				last = future;
+			});
+		});
+
+		return last;
 	}
 
 	function reset_steps()
